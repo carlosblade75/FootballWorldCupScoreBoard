@@ -17,6 +17,9 @@ namespace GeneralBoard
         AwayTeamNoExist = -8,
         NoTeamNoExist = -9,
         ScoreNegavite = -10,
+        LocalTeamNoPlaying = -11,
+        AwayTeamNoPlaying = -12,
+        MatchNoPlaying = -13,
         ErrorNoControlled = -100
     }
 }

@@ -215,11 +215,11 @@ namespace GeneralBoard.Models
 
             if (localTeamNoPlaying && awayTeamNoPlaying)
             {
-                error = ErrorType.MatchNoExist;
+                error = ErrorType.MatchNoPlaying;
             }
             else if (localTeamNoPlaying || awayTeamNoPlaying)
             {
-                error = localTeamNoPlaying ? ErrorType.LocalTeamInMatchNoExist : ErrorType.AwayTeamInMatchNoExist;
+                error = localTeamNoPlaying ? ErrorType.LocalTeamNoPlaying : ErrorType.AwayTeamNoPlaying;
             }
 
             return error;

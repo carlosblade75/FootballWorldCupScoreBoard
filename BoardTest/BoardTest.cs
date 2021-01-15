@@ -84,7 +84,45 @@ namespace BoardTest
             Assert.IsTrue(summary.Count == 0);
         }
 
+        [TestMethod]
+        public void CheckBoard_Add_Match_Local_Team_Already_Playing()
+        {
+            var board = new Board();
+
+            board.StartAGame(MXO_TEAM, CAD_TEAM);
+
+            var result = board.StartAGame(MXO_TEAM, SPA_TEAM);
+
+            Assert.IsTrue(result == ErrorType.LocalTeamAlreadyPlaying);
+        }
+
+        [TestMethod]
+        public void CheckBoard_Add_Match_Away_Team_Already_Playing()
+        {
+            var board = new Board();
+
+            board.StartAGame(MXO_TEAM, CAD_TEAM);
+
+            var result = board.StartAGame(SPA_TEAM, CAD_TEAM);
+
+            Assert.IsTrue(result == ErrorType.AwayTeamAlreadyPlaying);
+        }
+
+        [TestMethod]
+        public void CheckBoard_Add_Match_Already_Playing()
+        {
+            var board = new Board();
+
+            board.StartAGame(MXO_TEAM, CAD_TEAM);
+
+            var result = board.StartAGame(MXO_TEAM, CAD_TEAM);
+
+            Assert.IsTrue(result == ErrorType.MatchAlreadyPlaying);
+        }
+
         #endregion
+
+        #region UpdateGame
 
         [TestMethod]
         public void CheckBoard_Update_Match_Score()
@@ -115,7 +153,11 @@ namespace BoardTest
 
             var result = board.UpdateScore(MXO_TEAM, CAD_TEAM, (short)localScore, (short)awayScore);
 
+            var summary = board.GetSummaryOfGames();
+
             Assert.IsTrue(result == ErrorType.ScoreNegavite);
+            Assert.IsTrue(summary[0].LocalScore == 0);
+            Assert.IsTrue(summary[0].AwayScore == 0);
         }
 
         [TestMethod]
@@ -127,7 +169,27 @@ namespace BoardTest
 
             var result = board.UpdateScore("XXX", CAD_TEAM, 1, 0);
 
+            var summary = board.GetSummaryOfGames();
+
             Assert.IsTrue(result == ErrorType.LocalTeamNoExist);
+            Assert.IsTrue(summary[0].LocalScore == 0);
+            Assert.IsTrue(summary[0].AwayScore == 0);
+        }
+
+        [TestMethod]
+        public void CheckBoard_Update_Match_Local_Team_No_Playing()
+        {
+            var board = new Board();
+
+            board.StartAGame(MXO_TEAM, CAD_TEAM);
+
+            var result = board.UpdateScore(SPA_TEAM, CAD_TEAM, 1, 0);
+
+            var summary = board.GetSummaryOfGames();
+
+            Assert.IsTrue(result == ErrorType.LocalTeamNoPlaying);
+            Assert.IsTrue(summary[0].LocalScore == 0);
+            Assert.IsTrue(summary[0].AwayScore == 0);
         }
 
         [TestMethod]
@@ -139,7 +201,27 @@ namespace BoardTest
 
             var result = board.UpdateScore(MXO_TEAM, "XXX", 1, 0);
 
+            var summary = board.GetSummaryOfGames();
+
             Assert.IsTrue(result == ErrorType.AwayTeamNoExist);
+            Assert.IsTrue(summary[0].LocalScore == 0);
+            Assert.IsTrue(summary[0].AwayScore == 0);
+        }
+
+        [TestMethod]
+        public void CheckBoard_Update_Match_Away_Team_No_Playing()
+        {
+            var board = new Board();
+
+            board.StartAGame(MXO_TEAM, CAD_TEAM);
+
+            var result = board.UpdateScore(MXO_TEAM, SPA_TEAM, 1, 0);
+
+            var summary = board.GetSummaryOfGames();
+
+            Assert.IsTrue(result == ErrorType.AwayTeamNoPlaying);
+            Assert.IsTrue(summary[0].LocalScore == 0);
+            Assert.IsTrue(summary[0].AwayScore == 0);
         }
 
         [TestMethod]
@@ -151,8 +233,30 @@ namespace BoardTest
 
             var result = board.UpdateScore("YYY", "XXX", 1, 0);
 
+            var summary = board.GetSummaryOfGames();
+
             Assert.IsTrue(result == ErrorType.NoTeamNoExist);
+            Assert.IsTrue(summary[0].LocalScore == 0);
+            Assert.IsTrue(summary[0].AwayScore == 0);
         }
+
+        [TestMethod]
+        public void CheckBoard_Update_Match_Both_Team_No_Playing()
+        {
+            var board = new Board();
+
+            board.StartAGame(MXO_TEAM, CAD_TEAM);
+
+            var result = board.UpdateScore(BZL_TEAM, SPA_TEAM, 1, 0);
+
+            var summary = board.GetSummaryOfGames();
+
+            Assert.IsTrue(result == ErrorType.MatchNoPlaying);
+            Assert.IsTrue(summary[0].LocalScore == 0);
+            Assert.IsTrue(summary[0].AwayScore == 0);
+        }
+
+        #endregion
 
         #region Finish Method
 
@@ -186,6 +290,21 @@ namespace BoardTest
         }
 
         [TestMethod]
+        public void CheckBoard_Finish_Local_Team_No_Playing()
+        {
+            var board = new Board();
+
+            board.StartAGame(MXO_TEAM, CAD_TEAM);
+
+            var result = board.FinishGame(BZL_TEAM, CAD_TEAM);
+
+            var summary = board.GetSummaryOfGames();
+
+            Assert.IsTrue(summary.Count == 1);
+            Assert.IsTrue(result == ErrorType.LocalTeamNoPlaying);
+        }
+
+        [TestMethod]
         public void CheckBoard_Finish_Away_Team_Wrong()
         {
             var board = new Board();
@@ -198,6 +317,36 @@ namespace BoardTest
 
             Assert.IsTrue(summary.Count == 1);
             Assert.IsTrue(result == ErrorType.AwayTeamNoExist);
+        }
+
+        [TestMethod]
+        public void CheckBoard_Finish_Away_Team_No_Playing()
+        {
+            var board = new Board();
+
+            board.StartAGame(MXO_TEAM, CAD_TEAM);
+
+            var result = board.FinishGame(MXO_TEAM, BZL_TEAM);
+
+            var summary = board.GetSummaryOfGames();
+
+            Assert.IsTrue(summary.Count == 1);
+            Assert.IsTrue(result == ErrorType.AwayTeamNoPlaying);
+        }
+
+        [TestMethod]
+        public void CheckBoard_Finish_Both_Team_No_Playing()
+        {
+            var board = new Board();
+
+            board.StartAGame(MXO_TEAM, CAD_TEAM);
+
+            var result = board.FinishGame(SPA_TEAM, BZL_TEAM);
+
+            var summary = board.GetSummaryOfGames();
+
+            Assert.IsTrue(summary.Count == 1);
+            Assert.IsTrue(result == ErrorType.MatchNoPlaying);
         }
 
         [TestMethod]
