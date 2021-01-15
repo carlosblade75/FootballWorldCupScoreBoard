@@ -84,7 +84,7 @@ namespace GeneralBoard.Models
 
                     if (error == ErrorType.NoMistake)
                     {
-                        var match = currentMacthes.Where(m => m.AwayTeam.CodeTeam == codeLocalTeam).Single();
+                        var match = currentMacthes.Where(m => m.LocalTeam.CodeTeam == codeLocalTeam).Single();
 
                         currentMacthes.Remove(match);
                     }
