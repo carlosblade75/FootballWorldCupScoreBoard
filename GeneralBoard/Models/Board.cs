@@ -25,7 +25,7 @@ namespace GeneralBoard.Models
         /// We create a game 
         /// </summary>
         /// <param name="codeLocalTeam">Code of the local team</param>
-        /// <param name="codeAwayTeam">Code of the away tem</param>
+        /// <param name="codeAwayTeam">Code of the away team</param>
         /// <returns>Type of te error (ErrorType)</returns>
         public ErrorType StartAGame(string codeLocalTeam, string codeAwayTeam)
         {
@@ -41,6 +41,7 @@ namespace GeneralBoard.Models
 
                     if (error == ErrorType.NoMistake)
                     {
+                        // Look for the name of the teams in the "repository"
                         var nameLocalTeam = listTeam.GetTeamNameByCode(codeLocalTeam);
                         var nameAwayTeam = listTeam.GetTeamNameByCode(codeAwayTeam);
 
@@ -68,7 +69,7 @@ namespace GeneralBoard.Models
         /// Finish a game
         /// </summary>
         /// <param name="codeLocalTeam">Code of the local team</param>
-        /// <param name="codeAwayTeam">Code of the away tem</param>
+        /// <param name="codeAwayTeam">Code of the away team</param>
         /// <returns>Type of te error (ErrorType)</returns>
         public ErrorType FinishGame(string codeLocalTeam, string codeAwayTeam)
         {
@@ -102,7 +103,7 @@ namespace GeneralBoard.Models
         /// 
         /// </summary>
         /// <param name="codeLocalTeam">Code of the local team</param>
-        /// <param name="codeAwayTeam">Code of the away tem</param>
+        /// <param name="codeAwayTeam">Code of the away team</param>
         /// <param name="localScore">local score to update</param>
         /// <param name="awayScore">away score to update</param>
         /// <returns>Type of te error (ErrorType)</returns>
@@ -150,15 +151,21 @@ namespace GeneralBoard.Models
         {
             var list = new List<Summary>();
 
-            var select = from s in  currentMacthes select new { localScore = s.LocalScore, awayScore = s.AwayScore, nameLocalTeam = s.LocalTeam.NameTeam, nameAwayTeam = s.AwayTeam.NameTeam, totalScore = s.LocalScore + s.AwayScore, startDate = s.StartMacthDate };
+            var select = from s in  currentMacthes select new { localScore = s.LocalScore, 
+                                                                awayScore = s.AwayScore, 
+                                                                nameLocalTeam = s.LocalTeam.NameTeam, 
+                                                                nameAwayTeam = s.AwayTeam.NameTeam, 
+                                                                totalScore = s.LocalScore + s.AwayScore, 
+                                                                startDate = s.StartMacthDate 
+                                                                };
 
             var listMatch = select.OrderByDescending(d => d.totalScore).ThenByDescending(d => d.startDate).ToList();
 
             foreach(var match in listMatch)
             {
                 list.Add(new Summary { AwayTeam = match.nameAwayTeam, AwayScore = match.awayScore, LocalScore = match.localScore, LocalTeam = match.nameLocalTeam });
-
             }
+
             return list;
         }
 
