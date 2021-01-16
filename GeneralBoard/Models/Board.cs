@@ -10,13 +10,20 @@ namespace GeneralBoard.Models
     {
         private List<IMatch> currentMacthes;
 
-        private ListTeam listTeam;
+        private IRepositoryTeam listTeam;
 
         public Board()
         {
             currentMacthes = new List<IMatch>();
 
             listTeam = new ListTeam();
+        }
+
+        public Board(IRepositoryTeam list)
+        {
+            currentMacthes = new List<IMatch>();
+
+            listTeam = list;
         }
 
         #region Public Methods

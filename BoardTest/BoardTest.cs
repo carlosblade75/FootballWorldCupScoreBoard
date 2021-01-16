@@ -1,6 +1,10 @@
 using GeneralBoard;
+using GeneralBoard.Interfaces;
 using GeneralBoard.Models;
+using GeneralBoard.Repository;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
+using System;
 
 namespace BoardTest
 {
@@ -18,14 +22,22 @@ namespace BoardTest
         private const string ARG_TEAM = "ARG";
         private const string AUS_TEAM = "AUS";
 
+        private IRepositoryTeam listTeams;
+
         [TestMethod]
         public void CheckBoard_Start_No_Match()
         {
-            var board = new Board();
+            var board = new Board(listTeams);
 
             var summary = board.GetSummaryOfGames();
 
             Assert.IsTrue(summary.Count == 0);
+        }
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            listTeams = new ListTeam();
         }
 
         #region StartGame Method
@@ -33,7 +45,7 @@ namespace BoardTest
         [TestMethod]
         public void CheckBoard_Add_Match_Score_Zero()
         {
-            var board = new Board();
+            var board = new Board(listTeams);
 
             var result = board.StartAGame(MXO_TEAM, CAD_TEAM);
 
@@ -48,7 +60,7 @@ namespace BoardTest
         [TestMethod]
         public void CheckBoard_ErrorType_When_Add_Match_LocalTeam_Wrong()
         {
-            var board = new Board();
+            var board = new Board(listTeams);
 
             var result =  board.StartAGame("XXX", CAD_TEAM);
 
@@ -61,7 +73,7 @@ namespace BoardTest
         [TestMethod]
         public void CheckBoard_ErrorType_When_Add_Match_AwayTeam_Wrong()
         {
-            var board = new Board();
+            var board = new Board(listTeams);
 
             var result = board.StartAGame(CAD_TEAM, "XXX");
 
@@ -74,7 +86,7 @@ namespace BoardTest
         [TestMethod]
         public void CheckBoard_ErrorType_When_Add_Match_BothTeam_Wrong()
         {
-            var board = new Board();
+            var board = new Board(listTeams);
 
             var result = board.StartAGame("YYY", "XXX");
 
@@ -87,7 +99,7 @@ namespace BoardTest
         [TestMethod]
         public void CheckBoard_Add_Match_Local_Team_Already_Playing()
         {
-            var board = new Board();
+            var board = new Board(listTeams);
 
             board.StartAGame(MXO_TEAM, CAD_TEAM);
 
@@ -99,7 +111,7 @@ namespace BoardTest
         [TestMethod]
         public void CheckBoard_Add_Match_Away_Team_Already_Playing()
         {
-            var board = new Board();
+            var board = new Board(listTeams);
 
             board.StartAGame(MXO_TEAM, CAD_TEAM);
 
@@ -111,13 +123,30 @@ namespace BoardTest
         [TestMethod]
         public void CheckBoard_Add_Match_Already_Playing()
         {
-            var board = new Board();
+            var board = new Board(listTeams);
 
             board.StartAGame(MXO_TEAM, CAD_TEAM);
 
             var result = board.StartAGame(MXO_TEAM, CAD_TEAM);
 
             Assert.IsTrue(result == ErrorType.MatchAlreadyPlaying);
+        }
+
+        /// <summary>
+        ///  Simulate if there is a problem with the repository
+        /// </summary>
+        [TestMethod]
+        public void CheckBoard_Add_Match_No_ExceptionControlled()
+        {
+            var list = new Mock<IRepositoryTeam>();
+
+            list.Setup(x => x.ExistTeam(MXO_TEAM)).Throws(new Exception());
+
+            var board = new Board(list.Object);
+
+            var result = board.StartAGame(MXO_TEAM, CAD_TEAM);
+
+            Assert.IsTrue(result == ErrorType.ErrorNoControlled);
         }
 
         #endregion
@@ -127,7 +156,7 @@ namespace BoardTest
         [TestMethod]
         public void CheckBoard_Update_Match_Score()
         {
-            var board = new Board();
+            var board = new Board(listTeams);
 
             board.StartAGame(MXO_TEAM, CAD_TEAM);
 
@@ -147,7 +176,7 @@ namespace BoardTest
         [DataRow(-1, -3)]
         public void CheckBoard_Update_Match_Score_Negative(int localScore, int awayScore)
         {
-            var board = new Board();
+            var board = new Board(listTeams);
 
             board.StartAGame(MXO_TEAM, CAD_TEAM);
 
@@ -163,7 +192,7 @@ namespace BoardTest
         [TestMethod]
         public void CheckBoard_Update_Match_Local_Team_Wrong()
         {
-            var board = new Board();
+            var board = new Board(listTeams);
 
             board.StartAGame(MXO_TEAM, CAD_TEAM);
 
@@ -179,7 +208,7 @@ namespace BoardTest
         [TestMethod]
         public void CheckBoard_Update_Match_Local_Team_No_Playing()
         {
-            var board = new Board();
+            var board = new Board(listTeams);
 
             board.StartAGame(MXO_TEAM, CAD_TEAM);
 
@@ -195,7 +224,7 @@ namespace BoardTest
         [TestMethod]
         public void CheckBoard_Update_Match_Away_Team_Wrong()
         {
-            var board = new Board();
+            var board = new Board(listTeams);
 
             board.StartAGame(MXO_TEAM, CAD_TEAM);
 
@@ -211,7 +240,7 @@ namespace BoardTest
         [TestMethod]
         public void CheckBoard_Update_Match_Away_Team_No_Playing()
         {
-            var board = new Board();
+            var board = new Board(listTeams);
 
             board.StartAGame(MXO_TEAM, CAD_TEAM);
 
@@ -227,7 +256,7 @@ namespace BoardTest
         [TestMethod]
         public void CheckBoard_Update_Match_Both_Team_Wrong()
         {
-            var board = new Board();
+            var board = new Board(listTeams);
 
             board.StartAGame(MXO_TEAM, CAD_TEAM);
 
@@ -243,7 +272,7 @@ namespace BoardTest
         [TestMethod]
         public void CheckBoard_Update_Match_Both_Team_No_Playing()
         {
-            var board = new Board();
+            var board = new Board(listTeams);
 
             board.StartAGame(MXO_TEAM, CAD_TEAM);
 
@@ -256,6 +285,20 @@ namespace BoardTest
             Assert.IsTrue(summary[0].AwayScore == 0);
         }
 
+        [TestMethod]
+        public void CheckBoard_Update_Match_No_ExceptionControlled()
+        {
+            var list = new Mock<IRepositoryTeam>();
+
+            list.Setup(x => x.ExistTeam(BZL_TEAM)).Throws(new Exception());
+
+            var board = new Board(list.Object);
+
+            var result = board.UpdateScore(BZL_TEAM, SPA_TEAM, 1, 0);
+
+            Assert.IsTrue(result == ErrorType.ErrorNoControlled);
+        }
+
         #endregion
 
         #region Finish Method
@@ -263,7 +306,7 @@ namespace BoardTest
         [TestMethod]
         public void CheckBoard_Finish_Match()
         {
-            var board = new Board();
+            var board = new Board(listTeams);
 
             board.StartAGame(MXO_TEAM, CAD_TEAM);
 
@@ -277,7 +320,7 @@ namespace BoardTest
         [TestMethod]
         public void CheckBoard_Finish_Local_Team_Wrong()
         {
-            var board = new Board();
+            var board = new Board(listTeams);
 
             board.StartAGame(MXO_TEAM, CAD_TEAM);
 
@@ -292,7 +335,7 @@ namespace BoardTest
         [TestMethod]
         public void CheckBoard_Finish_Local_Team_No_Playing()
         {
-            var board = new Board();
+            var board = new Board(listTeams);
 
             board.StartAGame(MXO_TEAM, CAD_TEAM);
 
@@ -307,7 +350,7 @@ namespace BoardTest
         [TestMethod]
         public void CheckBoard_Finish_Away_Team_Wrong()
         {
-            var board = new Board();
+            var board = new Board(listTeams);
 
             board.StartAGame(MXO_TEAM, CAD_TEAM);
 
@@ -322,7 +365,7 @@ namespace BoardTest
         [TestMethod]
         public void CheckBoard_Finish_Away_Team_No_Playing()
         {
-            var board = new Board();
+            var board = new Board(listTeams);
 
             board.StartAGame(MXO_TEAM, CAD_TEAM);
 
@@ -337,7 +380,7 @@ namespace BoardTest
         [TestMethod]
         public void CheckBoard_Finish_Both_Team_No_Playing()
         {
-            var board = new Board();
+            var board = new Board(listTeams);
 
             board.StartAGame(MXO_TEAM, CAD_TEAM);
 
@@ -352,7 +395,21 @@ namespace BoardTest
         [TestMethod]
         public void CheckBoard_Finish_Both_Team_Wrong()
         {
-            var board = new Board();
+            var list = new Mock<IRepositoryTeam>();
+
+            list.Setup(x => x.ExistTeam(MXO_TEAM)).Throws(new Exception());
+
+            var board = new Board(list.Object);
+
+            var result = board.FinishGame(MXO_TEAM, CAD_TEAM);
+
+            Assert.IsTrue(result == ErrorType.ErrorNoControlled);
+        }
+
+        [TestMethod]
+        public void CheckBoard_Finish_No_ExceptionControlled()
+        {
+            var board = new Board(listTeams);
 
             board.StartAGame(MXO_TEAM, CAD_TEAM);
 
@@ -369,7 +426,7 @@ namespace BoardTest
         [TestMethod]
         public void CheckGetSummary()
         {
-            var board = new Board();
+            var board = new Board(listTeams);
 
             board.StartAGame(MXO_TEAM, CAD_TEAM);
             board.StartAGame(SPA_TEAM, BZL_TEAM);

@@ -1,9 +1,10 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
+using GeneralBoard.Interfaces;
 
 namespace GeneralBoard.Repository
 {
-    public class ListTeam
+    public class ListTeam: IRepositoryTeam
     {
         private Dictionary<string, string> teams;
 
